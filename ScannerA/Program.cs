@@ -5,16 +5,18 @@ using System.Text.RegularExpressions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         Console.Write("Enter directory path: ");
-        string path = Console.ReadLine();
-        string pipeName = "agent1"; // Update AgentB to use agent2 instead.
+        string? path = Console.ReadLine();
+        if (string.IsNullOrWhiteSpace(path)) return;
 
-        Process.GetCurrentProcess().ProcessorAffinity = (IntPtr)0x1; // Core 1
+#pragma warning disable CA1416
+        Process.GetCurrentProcess().ProcessorAffinity = (IntPtr)0x1; // CPU Core 1
+#pragma warning restore CA1416
 
-        var readThread = new Thread(() => SendWordIndex(path, pipeName));
-        readThread.Start();
+        var thread = new Thread(() => SendWordIndex(path!, "agent1"));
+        thread.Start();
     }
 
     static void SendWordIndex(string dirPath, string pipeName)
@@ -26,9 +28,8 @@ class Program
             string content = File.ReadAllText(file);
             var words = Regex.Matches(content.ToLower(), @"\w+");
 
-            var wordCount = words
-                .GroupBy(w => w.Value)
-                .ToDictionary(g => g.Key, g => g.Count());
+            var wordCount = words.GroupBy(w => w.Value)
+                                 .ToDictionary(g => g.Key, g => g.Count());
 
             foreach (var pair in wordCount)
             {
