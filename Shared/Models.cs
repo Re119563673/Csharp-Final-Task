@@ -9,3 +9,12 @@ namespace Shared
         public int Count { get; set; }
     }
 
+    public static class PipeHelper
+    {
+        public static string Serialize(List<WordEntry> entries)
+            => JsonSerializer.Serialize(entries);
+
+        public static List<WordEntry> Deserialize(string json)
+            => JsonSerializer.Deserialize<List<WordEntry>>(json) ?? new();
+    }
+}
